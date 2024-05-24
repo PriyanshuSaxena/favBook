@@ -17,17 +17,14 @@ export const favoriteBooksSlice = createSlice({
   name: 'favoriteBookList',
   initialState,
   reducers: {
-    loadFav: state => {
-      AsyncStorage.getItem('favBooks').then((data)=>{
-        if (data) state.list = JSON.parse(data);
-      });
+    loadFav: (state,action: PayloadAction<Volume[]>) => {
+      state.list = action.payload
     },
     setFavoriteBooks: (state, action: PayloadAction<Volume>) => {
       state.list.push(action.payload);
       AsyncStorage.setItem("favBooks", JSON.stringify(state.list));
     },
     removeBookById: (state, action: PayloadAction<string>) => {
-      // remove object from state
       let copyOfFavoriteBooks = [...state.list];
       let index = copyOfFavoriteBooks.findIndex((items: Volume) => {
         return items.id === action.payload;
@@ -35,7 +32,6 @@ export const favoriteBooksSlice = createSlice({
       copyOfFavoriteBooks.splice(index, 1);
       state.list = copyOfFavoriteBooks;
       AsyncStorage.setItem("favBooks", JSON.stringify(copyOfFavoriteBooks));
-      // to do: mmkv
     },
   },
 });

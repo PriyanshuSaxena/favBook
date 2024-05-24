@@ -1,12 +1,15 @@
-import React from 'react';
-import {FlatList, StyleSheet, Text, View} from 'react-native';
-import FavoriteIcon from '../svg/FavoriteIcon';
-import {useDispatch, useSelector} from 'react-redux';
-import {AppDispatch, RootState} from '../redux/store';
+import React, {useState} from 'react';
+import {FlatList, StyleSheet, View} from 'react-native';
+import {useSelector} from 'react-redux';
+import {RootState} from '../redux/store';
 import BookCard from '../components/BookCard';
 import {Volume} from '../constants/interface/InterfaceConstants';
+import LottieView from 'lottie-react-native';
+import DetailModal from '../components/DetailModal';
 
 const FavoriteBooks = () => {
+  const [detailModal, setDetailModal] = useState<boolean>(false);
+  const [selectedBook, setSelectedBook] = useState<Volume | undefined>();
   const favBooks = useSelector((state: RootState) => state.favBookList.list);
 
   return (
@@ -14,13 +17,32 @@ const FavoriteBooks = () => {
       <FlatList
         showsVerticalScrollIndicator={false}
         data={favBooks}
-        renderItem={({item}: {item: Volume}) => <BookCard bookDetails={item} isFavScreen={true} />}
+        renderItem={({item}: {item: Volume}) => (
+          <BookCard
+            bookDetails={item}
+            isFavScreen={true}
+            showDetails={() => {
+              setDetailModal(true);
+              setSelectedBook(item);
+            }}
+          />
+        )}
         keyExtractor={item => item.id}
         ListEmptyComponent={
-          <View>
-            <Text>No books found</Text>
+          <View style={styles.emptyListContainer}>
+            <LottieView
+              style={styles.emptyListAnimation}
+              source={require('../assets/animations/EmptyList.json')}
+              autoPlay
+              loop
+            />
           </View>
         }
+      />
+      <DetailModal
+        bookDetails={selectedBook}
+        modalVisible={detailModal}
+        onModalClose={() => setDetailModal(false)}
       />
     </View>
   );
@@ -29,20 +51,15 @@ const FavoriteBooks = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // padding: 10,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 16,
+  emptyListContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  itemContainer: {
-    // padding: 16,
-    // borderBottomWidth: 1,
-    // borderBottomColor: '#ccc',
-  },
-  bookId: {
-    fontSize: 16,
+  emptyListAnimation: {
+    height: 350,
+    width: 350,
   },
 });
 

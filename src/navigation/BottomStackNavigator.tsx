@@ -8,6 +8,7 @@ import FavoriteIcon from '../svg/FavoriteIcon';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../redux/store';
 import { loadFav } from '../redux/favoriteBooksSlice';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const BottomStackNavigator = () => {
@@ -16,27 +17,29 @@ const BottomStackNavigator = () => {
 const Tab = createBottomTabNavigator();
 const dispatch:AppDispatch = useDispatch()
   useEffect(()=>{
-    dispatch(loadFav())
+    AsyncStorage.getItem('favBooks').then((data)=>{
+      if (data) dispatch(loadFav(JSON.parse(data)));
+    });
+    
   },[])
   return (
     <Tab.Navigator   screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
+        tabBarIcon: ({ focused }) => {
           let iconName;
           if (route.name === 'Home') {
             iconName =  <SearchIcon isFocused={focused}/> ;
           } else if (route.name === 'FavoriteBooks') {
              iconName =  <FavoriteIcon isFocused={focused}/> ;
           }
-          // You can return any component that you like here!
           return iconName;
         },
         tabBarLabelStyle:{fontSize:12,fontWeight:'600'},
         tabBarActiveTintColor: '#2088F3',
         tabBarInactiveTintColor: '#666',
-        headerShown:false
+        // headerShown:false
       })}>
       <Tab.Screen name="Home" component={HomeScreen} options={{tabBarLabel:'Search Books'}} />
-      <Tab.Screen name="FavoriteBooks" component={FavoriteBooks} options={{tabBarLabel:'Favorite Books'}} />
+      <Tab.Screen name="FavoriteBooks" component={FavoriteBooks} options={{tabBarLabel:'Favorite Books',headerTitle:"Fav Books"}} />
     </Tab.Navigator>
   );
 };
