@@ -1,12 +1,16 @@
-import { View, Text, FlatList, StyleSheet } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import {View, Text, FlatList, StyleSheet} from 'react-native';
+import React, {useEffect, useState} from 'react';
 import bookServices from '../services/bookServices';
-import BooksList from '../components/BooksList';
-import { Volume } from '../constants/interface/InterfaceConstants';
+import {Volume} from '../constants/interface/InterfaceConstants';
+import SearchIcon from '../svg/SearchIcon';
+import BookCard from '../components/BookCard';
+import { useSelector } from 'react-redux';
+import { RootState } from '../redux/store';
 
 const HomeScreen = () => {
   const [searchedBooks, setSearchedBooks] = useState<Volume[]>([]);
   const [refreshing, setRefreshing] = useState<boolean>(false);
+  const favBooks = useSelector((state: RootState) => state.favBookList.list);
 
   useEffect(() => {
     fetchBooks();
@@ -18,6 +22,7 @@ const HomeScreen = () => {
       .getVolumes('dogs')
       .then(res => {
         setSearchedBooks(res.data.items);
+        console.log(JSON.stringify(res.data.items), '=====');
         setRefreshing(false);
       })
       .catch(err => {
@@ -26,29 +31,29 @@ const HomeScreen = () => {
       });
   };
 
-  const renderItem = ({ item }: { item: Volume }) => (
-    <View style={styles.itemContainer}>
-      <Text style={styles.bookId}>{item.id}</Text>
-      {/* Additional book details can be rendered here */}
-    </View>
+  const renderItem = ({item}: {item: Volume}) => (
+    <BookCard bookDetails={item} />
   );
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>HomeScreen</Text>
-      <BooksList />
       <FlatList
         showsVerticalScrollIndicator={false}
         data={searchedBooks}
+        extraData={favBooks}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={item => item.id}
         onRefresh={fetchBooks}
         refreshing={refreshing}
         onEndReachedThreshold={0.2}
         onEndReached={() => {
           // Implement load more functionality if needed
         }}
-        ListEmptyComponent={<View><Text>No books found</Text></View>}
+        ListEmptyComponent={
+          <View>
+            <Text>No books found</Text>
+          </View>
+        }
       />
     </View>
   );
@@ -57,7 +62,7 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    // padding: 10,
   },
   title: {
     fontSize: 24,
@@ -65,9 +70,9 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   itemContainer: {
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    // padding: 16,
+    // borderBottomWidth: 1,
+    // borderBottomColor: '#ccc',
   },
   bookId: {
     fontSize: 16,
